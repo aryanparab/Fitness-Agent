@@ -2,17 +2,21 @@ import streamlit as st
 from phi.agent import Agent
 from phi.model.groq import Groq
 from phi.tools.exa import ExaTools
+import time
+import json
 
-st.title("Fitness Guru 🐅")
+st.title("FitFreak 🐅")
 st.subheader("Your Personal Trainer 💪")
 st.caption("This app will create a custom Fitness plan for you to help you achieve your goals")
 
 md = "llama-3.3-70b-versatile"
-workout_data = ""
+workout_data = {}
 reciepe_data= ""
 
-with open('prev_data_workout.txt', 'r') as file:
-    workout_data = file.read()
+
+with open('prev_data_workout.json', 'r') as file:
+        workout_data = json.load(file)
+
 
 
 exercise_agent = Agent(
@@ -54,11 +58,14 @@ if submit:
             Does User have access to gym: {gym_access}. 
             Include cardio and steps goal :{include_steps} """
     print(input_statement)
+    # response = input_statement
+    # st.write("Done")
     response = exercise_agent.run(input_statement, stream=False)
     st.write(str(response.content))
-    with open('prev_data_workout.txt', 'w') as file:
-            print(response.content)
-            file.write(str(response.content))
+    with open('prev_data_workout.json', 'w') as file:
+            workout_data.update({time.ctime():response.content})
+            print(workout_data)
+            json.dump(workout_data, file, indent=4)
 
     
 

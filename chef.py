@@ -2,20 +2,26 @@ import streamlit as st
 from phi.agent import Agent
 from phi.model.groq import Groq
 from phi.tools.exa import ExaTools
+import json
+from datetime import datetime
+import time
 
-st.title("Fitness Guru 💪🗓️")
+st.title("FitFreak 💪🗓️")
 st.subheader("Your Personal Chef 🧑‍🍳")
 st.caption("This app will create a reciepes for you based on your workout plan and items in your kitchen")
 
 md = "llama-3.3-70b-versatile"
-workout_data = ""
+workout_data = {}
 reciepe_data= ""
 
-with open('prev_data_workout.txt', 'r') as file:
-    workout_data = file.read()
+try:
+    with open('prev_data_workout.json', 'r') as file:
+        workout_data = json.load(file)
+except:
+     pass
 
-with open('prev_data_reciepe.txt', 'r') as file:
-    reciepe_data = file.read()
+with open('prev_data_reciepe.json', 'r') as file:
+    reciepe_data = json.load(file)
 
 
 cook_agent = Agent(
@@ -61,10 +67,22 @@ with st.form("my_form"):
 
    submit = st.form_submit_button('Fight On!')
 
+def convert(date_time):
+    format = '%a %b %d %H:%M:%S %Y'
+    datetime_str = datetime.strptime(date_time, format)
+    return datetime_str
+
 if submit:
     rr="No routine"
     if take_exercise=="Yes":
-        rr =  summarizer.run(workout_data)
+        key,check = "",""
+        for i in workout_data.keys():
+            ks = convert(i)
+            if check=="" or ks>check:
+                key = i
+                check = ks
+        
+        rr =  summarizer.run(workout_data[key])
     if ingredients=="":
          ingredients="None"
     input_statement = f"""
@@ -76,9 +94,10 @@ if submit:
     print(input_statement)
     response = cook_agent.run(input_statement, stream=False)
     st.write(str(response.content))
-    with open('prev_data_reciepe.txt', 'w') as file:
-            print(response.content)
-            file.write(str(response.content))
+    with open('prev_data_reciepe.json', 'w') as file:
+            reciepe_data.update({time.ctime():response.content})
+            
+            json.dump(reciepe_data, file, indent=4)
 
     
 
