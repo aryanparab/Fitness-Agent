@@ -37,10 +37,12 @@ cook_agent = Agent(
         "Always search exa for recipe links or tips related to the recipes apart from knowledge base.",
         "Provide a list of recipes that match the user's requirements and preferences.",
         "If the user has not provided many ingredients or only core element of the food, provide an easy reciepe which doesn't require many ingredients."
-        "Always return steps of the cooking process"
+        "Always return steps of the cooking process",
+        "Answer returned should be less than 6000 tokens"
     ],
 )
 
+#fish, prawns,chicken, egss, rice, bread, roti, onions, tomato
 summarizer = Agent(
     description="Your job is to summarize the input data for optimal usage in LLM models",
     model = Groq(id=md),
